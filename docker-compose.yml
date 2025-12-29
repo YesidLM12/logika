@@ -1,0 +1,25 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: always # en caso de que falle vuelve a iniciar el servidor de la BD 
+    ports:
+        - "5432:5432"
+    environment: ## variables de entorno // Configuración inicial
+        DATABASE_HOST: ${DB_HOST}
+        POSTGRES_USER: ${DB_USER}
+        POSTGRES_PASSWORD: ${DB_PASSWORD}
+        POSTGRES_DB: ${DB_NAME}
+     # puerto de la BD (default  postgreSql)
+
+#   pgadmin:
+#     image: dpage/pgadmin
+#     environment:
+#         - PGADMIN_DEFAULT_EMAIL: "admin@admin.com"
+#         - PGADMIN_DEFAULT_PASSWORD: "admin"
+#     ports: 
+#         - "80:80"
+#     depends_on:
+#         - postgres
