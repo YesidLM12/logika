@@ -1,13 +1,18 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends,status
+from app.core.auth import get_current_user
 from app.db.session import get_db
 from sqlalchemy.orm import Session
 from app.schemas.Task_request import TaskRead, TaskCreate, TaskUpdate
 from app.services.Tasks_service import TasksService
 
-router = APIRouter(prefix="/tasks", tags=["tasks"])
+'''
+todos los endpoints requiren autenticacion
+'''
+
+router = APIRouter(prefix="/tasks", tags=["tasks"], dependencies=[Depends(get_current_user)])
 
 
-@router.post("/")
+@router.post("/", status_code=status.HTTP_201_CREATED)
 def create_task(task: TaskCreate, db: Session = Depends(get_db)):
     return TasksService(db=db).create_task(task=task)
 
@@ -27,6 +32,6 @@ def update_task(task_id: int, task: TaskUpdate, db: Session = Depends(get_db)):
     return TasksService(db=db).update_task(task_id=task_id, task_data=task)
 
 
-@router.delete("/{task_id}")
+@router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_task(task_id: int, db: Session = Depends(get_db)):
     return TasksService(db=db).delete_task(task_id=task_id)

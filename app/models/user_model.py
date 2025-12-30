@@ -9,4 +9,4 @@ class User(Base):
     username = Column(String, nullable=False, index=True) # Para busquedas por nombre de usuario
     email = Column(String, unique=True, nullable=False, index=True)
     password = Column(String, nullable=False)
-    is_active = Column(Boolean, default=True, nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False, index=True)
