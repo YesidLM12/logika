@@ -158,19 +158,19 @@ Se utilizan migraciones con Alembic para:
 ## Ejemplos de Uso
 
 ### Autenticación
-![login](../public/login.png)
+![login](public/login.png)
 
 ### Crear tarea
-![create](../public/crear%20tarea.png)
+![create](public/crear%20tarea.png)
 
 ### Listado de tareas
-![tasks](../public/listar_tareas.png)
+![tasks](public/listar_tareas.png)
 
 ### Eliminar tarea
-![delete](../public/eliminar_tarea.png)
+![delete](public/eliminar_tarea.png)
 
 ### Actualizar tarea
-![update](../public/editar_tarea.png)
+![update](public/editar_tarea.png)
 
 ### Buscar tarea por id
-![find](../public/buscar_tarea_por_id.png)
+![find](public/buscar_tarea_por_id.png)
