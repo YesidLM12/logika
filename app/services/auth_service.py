@@ -3,7 +3,7 @@ from fastapi import Depends, HTTPException
 from app.core.auth import create_access_token
 from app.core.security import verify_password
 from app.db.session import get_db
-from app.models.UserModel import User
+from app.models.user_model import User
 from sqlalchemy.orm import Session
 
 from app.schemas.UserLoginRequest import UserLogin

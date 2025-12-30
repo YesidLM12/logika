@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.db.session import SessionLocal
 
 from app.core.security import hash_password
-from app.models.UserModel import User
+from app.models.user_model import User
 
 
 def init_db() -> None:
