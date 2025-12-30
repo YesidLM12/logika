@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends,status
+from fastapi import APIRouter, Depends, Query, status
 from app.core.auth import get_current_user
 from app.db.session import get_db
 from sqlalchemy.orm import Session
@@ -9,7 +9,8 @@ from app.services.Tasks_service import TasksService
 todos los endpoints requiren autenticacion
 '''
 
-router = APIRouter(prefix="/tasks", tags=["tasks"], dependencies=[Depends(get_current_user)])
+router = APIRouter(
+    prefix="/tasks", tags=["tasks"], dependencies=[Depends(get_current_user)])
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
@@ -18,7 +19,10 @@ def create_task(task: TaskCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/", response_model=list[TaskRead])
-def list_tasks(page: int, page_size: int, db: Session = Depends(get_db)):
+def list_tasks(
+        page: int = Query(1, ge=1),
+        page_size: int = Query(10, ge=1, le=100),
+        db: Session = Depends(get_db)):
     return TasksService(db=db).list_tasks(page=page, page_size=page_size)
 
 

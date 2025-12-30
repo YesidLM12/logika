@@ -10,7 +10,7 @@ El proyecto es una API REST construida con FastAPI, que permite la gestión de t
 - FastAPI
 - SQLAlchemy
 - PostgreSQL (Docker)
-- Alembic(migraciones)
+- Alembic (migraciones)
 - JWT (Autenticación)
 - Bcrypt (hash de contraseñas)
 
@@ -38,6 +38,9 @@ pip install -r requirements.txt
 ```
 
 4. Configurar variables de entorno:
+
+Crear un archivo `.env` en la raíz del proyecto con las siguientes variables:
+
 
 ``` bash
 DB_HOST=localhost
@@ -72,18 +75,18 @@ uvicorn app.main:app --reload
 ### User
 
 - id (primary key, index = true)
-- username (nullable = true, index = true) // perimite hacer busquedas por nombre de usuario
+- username (nullable = true, index = true)  perimite hacer busquedas por nombre de usuario
 - email (unique = true, index = true)
 - password (nullable = false)
-- is_active (default = True, index = true) // facilita búsqueda de usuarios activos
+- is_active (default = True, index = true) facilita búsqueda de usuarios activos
 
 ### Task
 
 - id (primary key, index = true)
-- title (nullable = false, index = true) //  buscar tareas por titulo
+- title (nullable = false, index = true)   buscar tareas por titulo
 - description (nullable = true)
-- status (default = pending, index = true) // posibilidad de filtros y/o búsqueda por estado
-- created_at 
+- status (default = pending, index = true)  posibilidad de filtros y/o búsqueda por estado
+- created_at Se genera automaticamente
 
 
 ## Endpoints principales
@@ -101,11 +104,13 @@ Payload ejemplo:
 }
 ```
 
-- Usuario inicial creado automáticamente por medio de seed:
+- Usuario inicial creado automáticamente por medio de seed, a travez de event startup:
     - Email: `admin@admin.com`
     - Password: `admin123`
 
 ### Tasks
+`Nota`: Todos los endpoints requieren autenticación JWT.
+
 
 - `GET/tasks`-> Listado de tareas con paginación (page, page_size)
 - `POST/tasks`-> Crear nueva tarea
@@ -141,17 +146,15 @@ Esta separación permite mantener los endpoints livianos y concentrar la lógica
 Se utilizan migraciones con Alembic para:
 
 - Crear las tablas necesarias (`users`, `tasks`).
-- Crear automáticamente un usuario inicial mediante seed.
 - Garantizar que el proyecto pueda ejecutarse en un entorno limpio sin pasos manuales.
 
 ## Decisiones técnicas y trade-offs
 
 - Se utilizó JWT con un único access token para mantener la autenticación simple y clara, evitando la complejidad adicional de refresh tokens para el alcance de la prueba.
 
-- El usuario inicial se crea mediante una migración/seed en lugar de un endpoint administrativo, garantizando que el sistema sea usable desde el primer arranque sin configuraciones manuales.
+- El usuario inicial se crea mediante una seed en lugar de un endpoint administrativo, garantizando que el sistema sea usable desde el primer arranque sin configuraciones manuales.
 
 - Se implementó paginación usando offset/limit (`page`, `page_size`) por su simplicidad y claridad, en lugar de paginación por cursor, que resulta más compleja y no necesaria para este contexto.
-
 
 - Se definieron índices solo en campos relevantes para búsquedas frecuentes, evitando sobre-indexación innecesaria.
 
@@ -174,3 +177,28 @@ Se utilizan migraciones con Alembic para:
 
 ### Buscar tarea por id
 ![find](public/buscar_tarea_por_id.png)
+
+
+Al haber algún campo faltante o que el status no sea "pending", "in_progress" o "done", responderá con un estado 422 Unprocessable Entity
+![casos_borde](public/422-uhnprocessable-entity.png)
+
+
+De igual manera si la paginación empieza en 0 devolverá un 422 Unprocessable Entity, porque recordemos que la formula para su correcto funcionamiento es (1-1)*page_size = 0, quiere decir que no hay desplazamiento, entonces se muestra desde la primera tarea.
+
+Pero si el page es 0 seria (0-1)*page_size = -1, dando como resultado 500 Internal Server Error, pero esta linea en el endpoints:
+
+```python
+def list_tasks(
+        page: int = Query(1, ge=1),
+        page_size: int = Query(10, ge=1, le=100),
+        db: Session = Depends(get_db)):
+        ...
+```
+
+Restringe valores menores a 1 y mayores a 100. Evitando asi el 500 Internal Server Error.
+
+![casos_borde](public/offset-negativo.png)
+
+Si el token expira ó no es válido, devolverá un 401 Unauthorized.
+
+![casos_borde](public/401-unauthorized.png)

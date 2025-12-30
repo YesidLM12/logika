@@ -27,10 +27,19 @@ class TasksService:
         self.db.commit()
         self.db.refresh(db_task)
         return {"message": "Tarea creada con éxito", "data": db_task}
-    
 
     # Listar tareas
-    def list_tasks(self, page: int = Query(1, ge=1), page_size: int = Query(10, ge=1)):
+    def list_tasks(
+            self,
+            page: int = Query(1, ge=1),
+            page_size: int = Query(10, ge=1)):
+        '''
+        Garantiza que:
+        page no sea menor que 1
+        page_size tenga limites razonables
+        '''
+        page = max(page, 1)
+        page_size = max(page_size, 1)
         '''
         (1-1)* 10 = 0 => quiere decir que no hay desplazamiento
         se muestra desde la primera tarea
@@ -52,10 +61,13 @@ class TasksService:
         if not task:
             raise HTTPException(status_code=404, detail="Tarea no encontrada")
         return task
-    
 
     # Actualizar tarea
-    def update_task(self, task_id: int, task_data: TaskUpdate):
+    def update_task(
+        self,
+        task_id: int,
+        task_data: TaskUpdate):
+        
         db_task = self.db.query(Task).filter(Task.id == task_id).first()
 
         if not db_task:
@@ -74,17 +86,15 @@ class TasksService:
         self.db.commit()
         self.db.refresh(db_task)
         return db_task
-    
-    
-    ## Eliminar Tarea
+
+    # Eliminar Tarea
+
     def delete_task(self, task_id: int):
         db_task = self.db.query(Task).filter(Task.id == task_id).first()
-        
+
         if not db_task:
             raise HTTPException(status_code=404, detail="Tarea no encontrada")
-        
+
         self.db.delete(db_task)
         self.db.commit()
         return {"message": "Tarea eliminada con éxito"}
-    
-
